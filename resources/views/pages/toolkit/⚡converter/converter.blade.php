@@ -22,158 +22,118 @@
             {{-- Converter Card --}}
             <div class="mx-auto mt-12 max-w-2xl">
                 <div class="overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5">
-                    {{-- Drop Zone --}}
                     <div class="p-6 sm:p-8">
+                        {{-- Drop Zone --}}
                         <div
-                            @@dragover.prevent="dragOver = true"
-                            @@dragleave.prevent="dragOver = false"
-                            @@drop.prevent="handleDrop($event)"
+                            @dragover.prevent="dragOver = true"
+                            @dragleave.prevent="dragOver = false"
+                            @drop.prevent="handleDrop($event)"
                             :class="{
                                 'relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition-all duration-200': true,
-                                'border-indigo-300 bg-indigo-50/50': !file && !dragOver,
-                                'border-indigo-400 bg-indigo-100/70': dragOver && !file,
-                                'border-emerald-300 bg-emerald-50/50': file,
+                                'border-indigo-300 bg-indigo-50/50': files.length === 0 && !dragOver,
+                                'border-indigo-400 bg-indigo-100/70': dragOver,
+                                'border-emerald-300 bg-emerald-50/50': files.length > 0 && !dragOver,
                             }"
                         >
-                            <template x-if="!file">
-                                <div @@click="document.getElementById('fileInput').click()" class="flex flex-col items-center gap-3">
-                                    <span class="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
-                                        <span class="icon-[mdi--file-image-outline] text-2xl"></span>
-                                    </span>
-                                    <div class="text-center">
-                                        <p class="text-sm font-medium text-slate-700">
-                                            <span class="text-indigo-600 underline underline-offset-2">Click to upload</span>
-                                            <span class="text-slate-500"> or drag and drop</span>
-                                        </p>
-                                        <p class="mt-1 text-xs text-slate-400">PNG, JPG, WebP, AVIF, GIF, SVG, BMP, TIFF — up to 50 MB</p>
-                                    </div>
+                            <div @click="document.getElementById('fileInput').click()" class="flex flex-col items-center gap-3">
+                                <span class="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
+                                    <span class="icon-[mdi--file-image-outline] text-2xl"></span>
+                                </span>
+                                <div class="text-center">
+                                    <p class="text-sm font-medium text-slate-700">
+                                        <span class="text-indigo-600 underline underline-offset-2">Click to upload</span>
+                                        <span class="text-slate-500"> or drag and drop</span>
+                                    </p>
+                                    <p class="mt-1 text-xs text-slate-400">PNG, JPG, WebP — up to 50 MB each</p>
                                 </div>
-                            </template>
-                            <template x-if="file">
-                                <div class="flex w-full items-center gap-4">
-                                    <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
-                                        <span class="icon-[mdi--check-circle] text-xl"></span>
-                                    </span>
-                                    <div class="min-w-0 flex-1">
-                                        <p class="truncate text-sm font-medium text-slate-900" x-text="fileName"></p>
-                                        <p class="text-xs text-slate-500" x-text="formattedFileSize"></p>
-                                    </div>
-                                    <button @@click="removeFile()" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600">
-                                        <span class="icon-[mdi--close] text-lg"></span>
-                                    </button>
-                                </div>
-                            </template>
-                            <input id="fileInput" type="file" accept="image/*" @@change="handleFileSelect($event)" class="hidden">
+                            </div>
+                            <input id="fileInput" type="file" accept="image/*" multiple @change="handleFileSelect($event)" class="hidden">
                         </div>
 
-                        {{-- Format Selectors --}}
-                        <div class="mt-6 flex items-center gap-3">
-                            <div class="flex-1">
-                                <label class="mb-1.5 block text-xs font-medium text-slate-500">From</label>
-                                <div class="relative" @@click.outside="showFromDropdown = false">
-                                    <button
-                                        @@click="showFromDropdown = !showFromDropdown"
-                                        class="flex w-full items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-900 transition hover:border-slate-300"
-                                    >
-                                        <span class="flex items-center gap-2">
-                                            <span class="flex h-5 w-5 items-center justify-center rounded bg-slate-100 text-[10px] font-bold uppercase text-slate-500" x-text="fromFormat"></span>
-                                            <span x-text="fromFormatLabel"></span>
-                                        </span>
-                                        <span class="icon-[mdi--chevron-down] text-slate-400 transition" :class="{ 'rotate-180': showFromDropdown }"></span>
-                                    </button>
-                                    <div
-                                        x-show="showFromDropdown"
-                                        x-cloak
-                                        x-transition:enter="transition duration-150 ease-out"
-                                        x-transition:enter-start="translate-y-1 opacity-0"
-                                        x-transition:enter-end="translate-y-0 opacity-100"
-                                        class="absolute left-0 right-0 z-20 mt-1 max-h-60 overflow-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
-                                    >
-                                        <template x-for="fmt in formats" :key="fmt.value">
-                                            <button
-                                                @@click="selectFromFormat(fmt.value); showFromDropdown = false"
-                                                class="flex w-full items-center gap-3 px-3.5 py-2 text-left text-sm transition hover:bg-slate-50"
-                                                :class="{ 'bg-indigo-50 text-indigo-700': fmt.value === fromFormat }"
-                                            >
-                                                <span class="flex h-6 w-6 items-center justify-center rounded bg-slate-100 text-[10px] font-bold uppercase text-slate-500" x-text="fmt.value"></span>
-                                                <div>
-                                                    <p class="font-medium" x-text="fmt.label"></p>
-                                                    <p class="text-xs text-slate-400" x-text="fmt.desc"></p>
+                        {{-- File List --}}
+                        <template x-if="files.length > 0">
+                            <div class="mt-6">
+                                <div class="mb-3 flex items-center justify-between">
+                                    <p class="text-xs font-medium text-slate-500">
+                                        <span x-text="files.length"></span> file<span x-show="files.length !== 1">s</span> selected
+                                    </p>
+                                    <button @click="files = []; converted = false" class="text-xs font-medium text-red-500 transition hover:text-red-600">Remove all</button>
+                                </div>
+                                <div class="space-y-2">
+                                    <template x-for="(entry, index) in files" :key="entry.id">
+                                        <div class="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2.5">
+                                            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-indigo-100 text-indigo-600">
+                                                <span class="icon-[mdi--file-image-outline] text-sm"></span>
+                                            </span>
+                                            <div class="min-w-0 flex-1">
+                                                <p class="truncate text-sm font-medium text-slate-900" x-text="entry.name"></p>
+                                                <p class="text-xs text-slate-400" x-text="formatSize(entry.size)"></p>
+                                            </div>
+
+                                            {{-- From format (auto-detected, disabled) --}}
+                                            <span class="flex shrink-0 items-center gap-1 rounded-md border border-slate-200 bg-slate-100 px-2 py-1 text-[11px] font-semibold uppercase text-slate-500">
+                                                <span x-text="entry.fromFormat"></span>
+                                            </span>
+
+                                            <span class="text-slate-300">
+                                                <span class="icon-[mdi--arrow-right] text-lg"></span>
+                                            </span>
+
+                                            {{-- To format dropdown --}}
+                                            <div class="relative shrink-0" x-data="{ open: false }" x-on:click.outside="open = false">
+                                                <button
+                                                    x-on:click="open = !open"
+                                                    class="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 transition hover:border-slate-300"
+                                                >
+                                                    <span x-text="entry.toFormat.toUpperCase()"></span>
+                                                    <span class="icon-[mdi--chevron-down] text-slate-400 text-[14px]" x-bind:class="{ 'rotate-180': open }"></span>
+                                                </button>
+                                                <div
+                                                    x-show="open"
+                                                    x-cloak
+                                                    x-transition:enter="transition duration-100 ease-out"
+                                                    x-transition:enter-start="translate-y-0.5 opacity-0"
+                                                    x-transition:enter-end="translate-y-0 opacity-100"
+                                                    class="absolute right-0 top-full z-20 mt-1 w-40 overflow-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+                                                >
+                                                    <template x-for="fmt in formats" :key="fmt.value">
+                                                        <button
+                                                            x-on:click="selectToFormat(index, fmt.value); open = false"
+                                                            class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition hover:bg-slate-50"
+                                                            x-bind:class="{ 'bg-indigo-50 text-indigo-700': fmt.value === entry.toFormat }"
+                                                        >
+                                                            <span class="flex h-5 w-5 items-center justify-center rounded bg-slate-100 text-[9px] font-bold uppercase text-slate-500" x-text="fmt.value"></span>
+                                                            <span class="font-medium" x-text="fmt.label"></span>
+                                                            <span x-show="fmt.value === entry.toFormat" class="ml-auto text-indigo-500">
+                                                                <span class="icon-[mdi--check-bold] text-[11px]"></span>
+                                                            </span>
+                                                        </button>
+                                                    </template>
                                                 </div>
-                                                <span x-show="fmt.value === fromFormat" class="ml-auto text-indigo-500">
-                                                    <span class="icon-[mdi--check-bold] text-sm"></span>
-                                                </span>
+                                            </div>
+
+                                            {{-- Remove --}}
+                                            <button @click="removeFile(index)" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-600">
+                                                <span class="icon-[mdi--close] text-sm"></span>
                                             </button>
-                                        </template>
-                                    </div>
+                                        </div>
+                                    </template>
                                 </div>
                             </div>
-
-                            {{-- Swap Button --}}
-                            <div class="pt-5">
-                                <button
-                                    @@click="swapFormats()"
-                                    class="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition hover:border-slate-300 hover:text-slate-600 active:scale-95"
-                                    title="Swap formats"
-                                >
-                                    <span class="icon-[mdi--swap-horizontal-bold] text-lg"></span>
-                                </button>
-                            </div>
-
-                            <div class="flex-1">
-                                <label class="mb-1.5 block text-xs font-medium text-slate-500">To</label>
-                                <div class="relative" @@click.outside="showToDropdown = false">
-                                    <button
-                                        @@click="showToDropdown = !showToDropdown"
-                                        class="flex w-full items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-900 transition hover:border-slate-300"
-                                    >
-                                        <span class="flex items-center gap-2">
-                                            <span class="flex h-5 w-5 items-center justify-center rounded bg-slate-100 text-[10px] font-bold uppercase text-slate-500" x-text="toFormat"></span>
-                                            <span x-text="toFormatLabel"></span>
-                                        </span>
-                                        <span class="icon-[mdi--chevron-down] text-slate-400 transition" :class="{ 'rotate-180': showToDropdown }"></span>
-                                    </button>
-                                    <div
-                                        x-show="showToDropdown"
-                                        x-cloak
-                                        x-transition:enter="transition duration-150 ease-out"
-                                        x-transition:enter-start="translate-y-1 opacity-0"
-                                        x-transition:enter-end="translate-y-0 opacity-100"
-                                        class="absolute left-0 right-0 z-20 mt-1 max-h-60 overflow-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
-                                    >
-                                        <template x-for="fmt in formats" :key="fmt.value">
-                                            <button
-                                                @@click="selectToFormat(fmt.value); showToDropdown = false"
-                                                class="flex w-full items-center gap-3 px-3.5 py-2 text-left text-sm transition hover:bg-slate-50"
-                                                :class="{ 'bg-indigo-50 text-indigo-700': fmt.value === toFormat }"
-                                            >
-                                                <span class="flex h-6 w-6 items-center justify-center rounded bg-slate-100 text-[10px] font-bold uppercase text-slate-500" x-text="fmt.value"></span>
-                                                <div>
-                                                    <p class="font-medium" x-text="fmt.label"></p>
-                                                    <p class="text-xs text-slate-400" x-text="fmt.desc"></p>
-                                                </div>
-                                                <span x-show="fmt.value === toFormat" class="ml-auto text-indigo-500">
-                                                    <span class="icon-[mdi--check-bold] text-sm"></span>
-                                                </span>
-                                            </button>
-                                        </template>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        </template>
 
                         {{-- Convert Button --}}
                         <div class="mt-6">
                             <button
-                                @@click="convert()"
-                                :disabled="!file || converting"
+                                wire:click='forge()'
+                                :disabled="files.length === 0 || converting"
                                 class="flex w-full items-center justify-center gap-2.5 rounded-xl px-6 py-3.5 text-sm font-semibold text-white transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
-                                :class="converting ? 'bg-indigo-500' : file ? 'bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98]' : 'bg-slate-300'"
+                                :class="converting ? 'bg-indigo-500' : files.length > 0 ? 'bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98]' : 'bg-slate-300'"
                             >
                                 <template x-if="!converting && !converted">
                                     <>
                                         <span class="icon-[mdi--upload-outline] text-lg"></span>
-                                        Convert
+                                        Convert <span x-show="files.length > 0" x-text="'(' + files.length + ')'"></span>
                                     </>
                                 </template>
                                 <template x-if="converting">
@@ -335,123 +295,87 @@
 @script
     <script>
         Alpine.data('converterData', () => ({
-            // File State
-            file: null,
-            fileName: '',
-            fileSize: 0,
+            files: @entangle('imagesData'),
             dragOver: false,
-
-            // Format State
-            fromFormat: 'png',
-            toFormat: 'jpg',
-
-            // Conversion State
             converting: false,
             converted: false,
+            idCounter: 0,
 
-            // UI State
-            showFromDropdown: false,
-            showToDropdown: false,
-
-            // Format Data
             formats: [
                 { value: 'png', label: 'PNG', desc: 'Lossless, transparency' },
                 { value: 'jpg', label: 'JPG', desc: 'Lossy, small files' },
-                { value: 'webp', label: 'WebP', desc: 'Modern, efficient' },
-                { value: 'avif', label: 'AVIF', desc: 'Next-gen quality' },
-                { value: 'gif', label: 'GIF', desc: 'Animation support' },
-                { value: 'svg', label: 'SVG', desc: 'Vector graphics' },
-                { value: 'bmp', label: 'BMP', desc: 'Uncompressed' },
-                { value: 'tiff', label: 'TIFF', desc: 'Print ready' },
-                { value: 'ico', label: 'ICO', desc: 'Icon files' },
-                { value: 'heic', label: 'HEIC', desc: 'Apple format' },
+                { value: 'webp', label: 'WebP', desc: 'Modern, efficient' }
             ],
 
             formatCategories: [
                 {
                     name: 'Raster Images',
-                    formats: ['PNG', 'JPG', 'WebP', 'AVIF', 'GIF', 'BMP', 'TIFF', 'ICO', 'HEIC'],
-                },
-                {
-                    name: 'Vector Graphics',
-                    formats: ['SVG'],
-                },
+                    formats: ['PNG', 'JPG', 'WebP'],
+                }
             ],
 
-            get formattedFileSize() {
-                if (!this.fileSize) return ''
-                const bytes = this.fileSize
+            formatSize(bytes) {
+                if (!bytes) return ''
                 if (bytes < 1024) return bytes + ' B'
                 if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB'
                 return (bytes / 1048576).toFixed(1) + ' MB'
             },
 
-            get fromFormatLabel() {
-                const fmt = this.formats.find(f => f.value === this.fromFormat)
-                return fmt ? fmt.label : this.fromFormat.toUpperCase()
-            },
-
-            get toFormatLabel() {
-                const fmt = this.formats.find(f => f.value === this.toFormat)
-                return fmt ? fmt.label : this.toFormat.toUpperCase()
-            },
-
             handleFileSelect(event) {
-                const files = event.target.files
-                if (files.length > 0) this.setFile(files[0])
+                this.addFiles(event.target.files)
                 event.target.value = ''
             },
 
             handleDrop(event) {
                 this.dragOver = false
-                const files = event.dataTransfer.files
-                if (files.length > 0) this.setFile(files[0])
+                this.addFiles(event.dataTransfer.files)
             },
 
-            setFile(file) {
-                if (!file.type.startsWith('image/')) return
-                this.file = file
-                this.fileName = file.name
-                this.fileSize = file.size
-                this.converted = false
+            addFiles(fileList) {
+                for (const file of fileList) {
+                    console.log(file)
+                    if (!file.type.startsWith('image/')) continue
+                    const ext = file.name.split('.').pop().toLowerCase()
+                    const match = this.formats.find(f => f.value === ext)
+                    let id = this.idCounter++
+                    this.files.push({
+                        id: id,
+                        name: file.name,
+                        size: file.size,
+                        fromFormat: match ? ext : 'png',
+                        toFormat: ext === 'png' ? 'jpg' : 'png',
+                    })
 
-                const ext = file.name.split('.').pop().toLowerCase()
-                const match = this.formats.find(f => f.value === ext)
-                if (match) this.fromFormat = ext
-            },
-
-            removeFile() {
-                this.file = null
-                this.fileName = ''
-                this.fileSize = 0
-                this.converted = false
-            },
-
-            swapFormats() {
-                const temp = this.fromFormat
-                this.fromFormat = this.toFormat
-                this.toFormat = temp
-            },
-
-            selectFromFormat(value) {
-                this.fromFormat = value
+                    this.$wire.upload(
+                        `images.${id}`,
+                        file,
+                        (uploadedFilename) => {
+                            console.log(uploadedFilename)
+                        }
+                    )
+                }
                 this.converted = false
             },
 
-            selectToFormat(value) {
-                this.toFormat = value
+            removeFile(index) {
+                this.files.splice(index, 1)
+                if (this.files.length === 0) this.converted = false
+            },
+
+            selectToFormat(index, value) {
+                this.files[index].toFormat = value
                 this.converted = false
             },
 
             convert() {
-                if (!this.file || this.converting) return
-                this.converting = true
-                this.converted = false
+                // if (this.files.length === 0 || this.converting) return
+                // this.converting = true
+                // this.converted = false
 
-                setTimeout(() => {
-                    this.converting = false
-                    this.converted = true
-                }, 2000)
+                // setTimeout(() => {
+                //     this.converting = false
+                //     this.converted = true
+                // }, 2000)
             },
         }))
     </script>
