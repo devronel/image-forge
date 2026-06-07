@@ -51,76 +51,111 @@
                         </div>
 
                         {{-- File List --}}
-                        <template x-if="files.length > 0">
-                            <div class="mt-6">
-                                <div class="mb-3 flex items-center justify-between">
-                                    <p class="text-xs font-medium text-slate-500">
-                                        <span x-text="files.length"></span> file<span x-show="files.length !== 1">s</span> selected
-                                    </p>
-                                    <button @click="files = []; converted = false" class="text-xs font-medium text-red-500 transition hover:text-red-600">Remove all</button>
-                                </div>
-                                <div class="space-y-2">
-                                    <template x-for="(entry, index) in files" :key="entry.id">
-                                        <div class="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2.5">
-                                            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-indigo-100 text-indigo-600">
-                                                <span class="icon-[mdi--file-image-outline] text-sm"></span>
-                                            </span>
-                                            <div class="min-w-0 flex-1">
-                                                <p class="truncate text-sm font-medium text-slate-900" x-text="entry.name"></p>
-                                                <p class="text-xs text-slate-400" x-text="formatSize(entry.size)"></p>
+                        @if (!empty($convertedImages))
+                            <div class="mt-6 space-y-3">
+                                <p class="text-xs font-medium text-emerald-600">
+                                    <span class="icon-[mdi--check-circle] mr-1 text-xs"></span>
+                                    {{ count($convertedImages) }} converted file{{ count($convertedImages) !== 1 ? 's' : '' }}
+                                </p>
+                                @foreach ($convertedImages as $index => $converted)
+                                    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                                        <div class="flex items-start gap-4 p-4">
+                                            <div class="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-slate-100">
+                                                <img src="{{ asset('storage/temp/' . $converted) }}" alt="" class="h-full w-full object-cover">
                                             </div>
-
-                                            {{-- From format (auto-detected, disabled) --}}
-                                            <span class="flex shrink-0 items-center gap-1 rounded-md border border-slate-200 bg-slate-100 px-2 py-1 text-[11px] font-semibold uppercase text-slate-500">
-                                                <span x-text="entry.fromFormat"></span>
-                                            </span>
-
-                                            <span class="text-slate-300">
-                                                <span class="icon-[mdi--arrow-right] text-lg"></span>
-                                            </span>
-
-                                            {{-- To format dropdown --}}
-                                            <div class="relative shrink-0" x-data="{ open: false }" x-on:click.outside="open = false">
-                                                <button
-                                                    x-on:click="open = !open"
-                                                    class="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 transition hover:border-slate-300"
-                                                >
-                                                    <span x-text="entry.toFormat.toUpperCase()"></span>
-                                                    <span class="icon-[mdi--chevron-down] text-slate-400 text-[14px]" x-bind:class="{ 'rotate-180': open }"></span>
-                                                </button>
-                                                <div
-                                                    x-show="open"
-                                                    x-cloak
-                                                    x-transition:enter="transition duration-100 ease-out"
-                                                    x-transition:enter-start="translate-y-0.5 opacity-0"
-                                                    x-transition:enter-end="translate-y-0 opacity-100"
-                                                    class="absolute right-0 top-full z-20 mt-1 w-40 overflow-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
-                                                >
-                                                    <template x-for="fmt in formats" :key="fmt.value">
-                                                        <button
-                                                            x-on:click="selectToFormat(index, fmt.value); open = false"
-                                                            class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition hover:bg-slate-50"
-                                                            x-bind:class="{ 'bg-indigo-50 text-indigo-700': fmt.value === entry.toFormat }"
-                                                        >
-                                                            <span class="flex h-5 w-5 items-center justify-center rounded bg-slate-100 text-[9px] font-bold uppercase text-slate-500" x-text="fmt.value"></span>
-                                                            <span class="font-medium" x-text="fmt.label"></span>
-                                                            <span x-show="fmt.value === entry.toFormat" class="ml-auto text-indigo-500">
-                                                                <span class="icon-[mdi--check-bold] text-[11px]"></span>
-                                                            </span>
-                                                        </button>
-                                                    </template>
+                                            <div class="min-w-0 flex-1">
+                                                <p class="truncate text-sm font-medium text-slate-900">{{ $converted }}</p>
+                                                @php
+                                                    $fullPath = storage_path('app/public/temp/' . $converted);
+                                                    $size = file_exists($fullPath) ? filesize($fullPath) : 0;
+                                                @endphp
+                                                <p class="mt-0.5 text-xs text-slate-500">{{ $size > 0 ? round($size / 1024, 1) . ' KB' : '' }}</p>
+                                                <div class="mt-2">
+                                                    <button
+                                                        wire:click="downloadConverted({{ $index }})"
+                                                        class="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-indigo-700"
+                                                    >
+                                                        <span class="icon-[mdi--download] text-sm"></span>
+                                                        Download
+                                                    </button>
                                                 </div>
                                             </div>
-
-                                            {{-- Remove --}}
-                                            <button @click="removeFile(index)" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-600">
-                                                <span class="icon-[mdi--close] text-sm"></span>
-                                            </button>
                                         </div>
-                                    </template>
-                                </div>
+                                    </div>
+                                @endforeach
                             </div>
-                        </template>
+                        @else
+                            <template x-if="files.length > 0">
+                                <div class="mt-6">
+                                    <div class="mb-3 flex items-center justify-between">
+                                        <p class="text-xs font-medium text-slate-500">
+                                            <span x-text="files.length"></span> file<span x-show="files.length !== 1">s</span> selected
+                                        </p>
+                                        <button @click="files = []; converted = false" class="text-xs font-medium text-red-500 transition hover:text-red-600">Remove all</button>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <template x-for="(entry, index) in files" :key="entry.id">
+                                            <div class="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2.5">
+                                                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-indigo-100 text-indigo-600">
+                                                    <span class="icon-[mdi--file-image-outline] text-sm"></span>
+                                                </span>
+                                                <div class="min-w-0 flex-1">
+                                                    <p class="truncate text-sm font-medium text-slate-900" x-text="entry.name"></p>
+                                                    <p class="text-xs text-slate-400" x-text="formatSize(entry.size)"></p>
+                                                </div>
+
+                                                {{-- From format (auto-detected, disabled) --}}
+                                                <span class="flex shrink-0 items-center gap-1 rounded-md border border-slate-200 bg-slate-100 px-2 py-1 text-[11px] font-semibold uppercase text-slate-500">
+                                                    <span x-text="entry.fromFormat"></span>
+                                                </span>
+
+                                                <span class="text-slate-300">
+                                                    <span class="icon-[mdi--arrow-right] text-lg"></span>
+                                                </span>
+
+                                                {{-- To format dropdown --}}
+                                                <div class="relative shrink-0" x-data="{ open: false }" x-on:click.outside="open = false">
+                                                    <button
+                                                        x-on:click="open = !open"
+                                                        class="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 transition hover:border-slate-300"
+                                                    >
+                                                        <span x-text="entry.toFormat.toUpperCase()"></span>
+                                                        <span class="icon-[mdi--chevron-down] text-slate-400 text-[14px]" x-bind:class="{ 'rotate-180': open }"></span>
+                                                    </button>
+                                                    <div
+                                                        x-show="open"
+                                                        x-cloak
+                                                        x-transition:enter="transition duration-100 ease-out"
+                                                        x-transition:enter-start="translate-y-0.5 opacity-0"
+                                                        x-transition:enter-end="translate-y-0 opacity-100"
+                                                        class="absolute right-0 top-full z-20 mt-1 w-40 overflow-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+                                                    >
+                                                        <template x-for="fmt in formats" :key="fmt.value">
+                                                            <button
+                                                                x-on:click="selectToFormat(index, fmt.value); open = false"
+                                                                class="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition hover:bg-slate-50"
+                                                                x-bind:class="{ 'bg-indigo-50 text-indigo-700': fmt.value === entry.toFormat }"
+                                                            >
+                                                                <span class="flex h-5 w-5 items-center justify-center rounded bg-slate-100 text-[9px] font-bold uppercase text-slate-500" x-text="fmt.value"></span>
+                                                                <span class="font-medium" x-text="fmt.label"></span>
+                                                                <span x-show="fmt.value === entry.toFormat" class="ml-auto text-indigo-500">
+                                                                    <span class="icon-[mdi--check-bold] text-[11px]"></span>
+                                                                </span>
+                                                            </button>
+                                                        </template>
+                                                    </div>
+                                                </div>
+
+                                                {{-- Remove --}}
+                                                <button @click="removeFile(index)" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-600">
+                                                    <span class="icon-[mdi--close] text-sm"></span>
+                                                </button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        @endif
 
                         {{-- Convert Button --}}
                         <div class="mt-6">
@@ -296,6 +331,7 @@
     <script>
         Alpine.data('converterData', () => ({
             files: @entangle('imagesData'),
+            convertedImages: @entangle('convertedImages'),
             dragOver: false,
             converting: false,
             converted: false,
@@ -332,6 +368,7 @@
             },
 
             addFiles(fileList) {
+                this.convertedImages = []
                 for (const file of fileList) {
                     console.log(file)
                     if (!file.type.startsWith('image/')) continue
