@@ -16,7 +16,7 @@ class ImageProcessingService
 
     public function convert(UploadedFile $file, string $format): string 
     {
-        $filename = Str::ulid() . '.' . $format;
+        $filename = now()->format('Ymd_His') . '_' . Str::ulid() . '.' . $format;
 
         $path = $this->generatePath($filename);
 
@@ -28,7 +28,7 @@ class ImageProcessingService
             $image = $image->fill('#ffffff');
         }
 
-        $image->encodeUsingFormat($imageFormat->interventionFormat())->save($path);
+        $image->encodeUsingFormat($imageFormat->interventionFormat(), quality: 90)->save($path);
 
         return $filename;
     }

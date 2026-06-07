@@ -44,10 +44,10 @@
                                         <span class="text-indigo-600 underline underline-offset-2">Click to upload</span>
                                         <span class="text-slate-500"> or drag and drop</span>
                                     </p>
-                                    <p class="mt-1 text-xs text-slate-400">PNG, JPG, WebP — up to 50 MB each</p>
+                                    <p class="mt-1 text-xs text-slate-400">PNG, JPEG, JPG, WebP — up to 50 MB each</p>
                                 </div>
                             </div>
-                            <input id="fileInput" type="file" accept="image/*" multiple @change="handleFileSelect($event)" class="hidden">
+                            <input id="fileInput" type="file" accept=".jpeg,.jpg,.png,.webp" multiple @change="handleFileSelect($event)" class="hidden">
                         </div>
 
                         {{-- File List --}}
@@ -235,66 +235,88 @@
     <section class="bg-white py-16 sm:py-24">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto max-w-2xl text-center">
-                <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Why Image Forge?</h2>
+                <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+                    Why Image Forge?
+                </h2>
                 <p class="mt-3 text-base leading-relaxed text-slate-500">
-                    Built for speed and privacy. All processing happens locally — your files never leave your device.
+                    Fast, secure, and simple image conversion. Convert your images in seconds with support for the most common web formats.
                 </p>
             </div>
+
             <div class="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+
                 <div class="group rounded-xl border border-slate-200 bg-white p-6 transition hover:border-indigo-200 hover:shadow-md">
                     <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 transition group-hover:bg-indigo-200">
                         <span class="icon-[mdi--lightning-bolt-outline] text-xl"></span>
                     </span>
-                    <h3 class="mt-4 text-base font-semibold text-slate-900">Blazing Fast</h3>
+                    <h3 class="mt-4 text-base font-semibold text-slate-900">
+                        Fast Conversion
+                    </h3>
                     <p class="mt-2 text-sm leading-relaxed text-slate-500">
-                        Optimized conversion pipelines deliver results in milliseconds. No queues, no waiting.
+                        Convert images quickly with an optimized processing pipeline designed for speed.
                     </p>
                 </div>
+
                 <div class="group rounded-xl border border-slate-200 bg-white p-6 transition hover:border-indigo-200 hover:shadow-md">
                     <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 transition group-hover:bg-indigo-200">
                         <span class="icon-[mdi--shield-check-outline] text-xl"></span>
                     </span>
-                    <h3 class="mt-4 text-base font-semibold text-slate-900">Private by Design</h3>
+                    <h3 class="mt-4 text-base font-semibold text-slate-900">
+                        Secure Processing
+                    </h3>
                     <p class="mt-2 text-sm leading-relaxed text-slate-500">
-                        Files processed entirely in your browser. Nothing is ever stored on our servers.
+                        Files are processed temporarily and automatically cleaned up to help protect your privacy.
                     </p>
                 </div>
+
                 <div class="group rounded-xl border border-slate-200 bg-white p-6 transition hover:border-indigo-200 hover:shadow-md">
                     <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 transition group-hover:bg-indigo-200">
-                        <span class="icon-[mdi--cog-outline] text-xl"></span>
+                        <span class="icon-[mdi--image-outline] text-xl"></span>
                     </span>
-                    <h3 class="mt-4 text-base font-semibold text-slate-900">Lossless Quality</h3>
+                    <h3 class="mt-4 text-base font-semibold text-slate-900">
+                        High Quality Output
+                    </h3>
                     <p class="mt-2 text-sm leading-relaxed text-slate-500">
-                        Fine-tune compression and quality settings. Get the perfect balance every time.
+                        Convert images while maintaining clear and reliable image quality.
                     </p>
                 </div>
+
                 <div class="group rounded-xl border border-slate-200 bg-white p-6 transition hover:border-indigo-200 hover:shadow-md">
                     <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 transition group-hover:bg-indigo-200">
                         <span class="icon-[mdi--file-image-outline] text-xl"></span>
                     </span>
-                    <h3 class="mt-4 text-base font-semibold text-slate-900">All Formats</h3>
+                    <h3 class="mt-4 text-base font-semibold text-slate-900">
+                        Popular Formats
+                    </h3>
                     <p class="mt-2 text-sm leading-relaxed text-slate-500">
-                        From common formats to niche ones — we support everything you throw at us.
+                        Easily convert between JPG, PNG, and WebP image formats.
                     </p>
                 </div>
+
                 <div class="group rounded-xl border border-slate-200 bg-white p-6 transition hover:border-indigo-200 hover:shadow-md">
                     <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 transition group-hover:bg-indigo-200">
                         <span class="icon-[mdi--responsive] text-xl"></span>
                     </span>
-                    <h3 class="mt-4 text-base font-semibold text-slate-900">Works Everywhere</h3>
+                    <h3 class="mt-4 text-base font-semibold text-slate-900">
+                        Works Everywhere
+                    </h3>
                     <p class="mt-2 text-sm leading-relaxed text-slate-500">
-                        Desktop, tablet, or phone. The forge works on any device with a modern browser.
+                        Use Image Forge on desktop, tablet, or mobile with a responsive experience.
                     </p>
                 </div>
+
                 <div class="group rounded-xl border border-slate-200 bg-white p-6 transition hover:border-indigo-200 hover:shadow-md">
                     <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 transition group-hover:bg-indigo-200">
                         <span class="icon-[mdi--infinity] text-xl"></span>
                     </span>
-                    <h3 class="mt-4 text-base font-semibold text-slate-900">Unlimited Use</h3>
+                    <h3 class="mt-4 text-base font-semibold text-slate-900">
+                        Free to Use
+                    </h3>
                     <p class="mt-2 text-sm leading-relaxed text-slate-500">
-                        No daily limits, no premium tiers. Convert as many files as you need, completely free.
+                        Convert as many images as you need without subscriptions or hidden limits.
                     </p>
                 </div>
+
             </div>
         </div>
     </section>
