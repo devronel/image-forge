@@ -4,6 +4,7 @@ use App\Enums\ImageFormat;
 use App\Services\ImageProcessingService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -28,7 +29,7 @@ new class extends Component
 
         foreach ($this->imagesData ?? [] as $image) {
             $id = $image['id'] ?? null;
-            $rules["images.$id"] = ['required', 'file', 'image', 'max:51200'];
+            $rules["images.$id"] = ['required', 'file', 'image', 'max:16384'];
         }
 
         $files = [];
@@ -46,8 +47,9 @@ new class extends Component
 
         try {
             foreach ($validated['imagesData'] as $image) {
-                $converted = app(ImageProcessingService::class)->convert($validated['images'][$image['id']], $image['toFormat']);
-                $this->convertedImages[] = $converted;
+                $data = app(ImageProcessingService::class)->convert($validated['images'][$image['id']], $image['toFormat']);
+                $name = now()->format('Ymd_His') . '_' . Str::ulid() . '.' . $image['toFormat'];
+                $this->convertedImages[] = ['name' => $name, 'data' => base64_encode($data)];
             }
     
             $this->reset('images', 'imagesData');
@@ -62,15 +64,14 @@ new class extends Component
 
     public function downloadConverted(int $index): StreamedResponse
     {
-        $filename = $this->convertedImages[$index] ?? null;
-        $path = storage_path('app/public/temp/' . $filename);
+        $item = $this->convertedImages[$index] ?? null;
 
-        if (!$filename || !file_exists($path)) {
+        if (!$item) {
             abort(404);
         }
 
-        return response()->streamDownload(function () use ($path) {
-            echo file_get_contents($path);
-        }, $filename);
+        return response()->streamDownload(function () use ($item) {
+            echo base64_decode($item['data']);
+        }, $item['name']);
     }
 };

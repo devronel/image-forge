@@ -44,7 +44,7 @@
                                         <span class="text-indigo-600 underline underline-offset-2">Click to upload</span>
                                         <span class="text-slate-500"> or drag and drop</span>
                                     </p>
-                                    <p class="mt-1 text-xs text-slate-400">PNG, JPEG, JPG, WebP — up to 50 MB each</p>
+                                    <p class="mt-1 text-xs text-slate-400">PNG, JPEG, JPG, WebP — up to 16 MB each</p>
                                 </div>
                             </div>
                             <input id="fileInput" type="file" accept=".jpeg,.jpg,.png,.webp" multiple @change="handleFileSelect($event)" class="hidden">
@@ -60,20 +60,20 @@
                                 @foreach ($convertedImages as $index => $converted)
                                     <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                                         <div class="flex items-start gap-4 p-4">
+                                            @php
+                                                $ext = pathinfo($converted['name'], PATHINFO_EXTENSION);
+                                                $mime = $ext === 'jpg' || $ext === 'jpeg' ? 'jpeg' : $ext;
+                                            @endphp
                                             <div class="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-slate-100">
-                                                <img src="{{ asset('storage/temp/' . $converted) }}" alt="" class="h-full w-full object-cover">
+                                                <img src="data:image/{{ $mime }};base64,{{ $converted['data'] }}" alt="" class="h-full w-full object-cover">
                                             </div>
                                             <div class="min-w-0 flex-1">
-                                                <p class="truncate text-sm font-medium text-slate-900">{{ $converted }}</p>
-                                                @php
-                                                    $fullPath = storage_path('app/public/temp/' . $converted);
-                                                    $size = file_exists($fullPath) ? filesize($fullPath) : 0;
-                                                @endphp
-                                                <p class="mt-0.5 text-xs text-slate-500">{{ $size > 0 ? round($size / 1024, 1) . ' KB' : '' }}</p>
+                                                <p class="truncate text-sm font-medium text-slate-900">{{ $converted['name'] }}</p>
+                                                <p class="mt-0.5 text-xs text-slate-500">{{ round(strlen(base64_decode($converted['data'])) / 1024, 1) . ' KB' }}</p>
                                                 <div class="mt-2">
                                                     <button
                                                         wire:click="downloadConverted({{ $index }})"
-                                                        class="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-indigo-700"
+                                                        class="cursor-pointer inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-indigo-700"
                                                     >
                                                         <span class="icon-[mdi--download] text-sm"></span>
                                                         Download
@@ -160,9 +160,12 @@
                         {{-- Convert Button --}}
                         <div class="mt-6">
                             <button
-                                wire:click='forge()'
                                 :disabled="files.length === 0 || converting"
-                                class="flex w-full items-center justify-center gap-2.5 rounded-xl px-6 py-3.5 text-sm font-semibold text-white transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
+                                @click="
+                                    converting = true;
+                                    $wire.forge().then(() => { converting = false; converted = true }).catch(() => { converting = false });
+                                "
+                                class="cursor-pointer flex w-full items-center justify-center gap-2.5 rounded-xl px-6 py-3.5 text-sm font-semibold text-white transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
                                 :class="converting ? 'bg-indigo-500' : files.length > 0 ? 'bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98]' : 'bg-slate-300'"
                             >
                                 <template x-if="!converting && !converted">
@@ -197,8 +200,8 @@
                                 Fast
                             </span>
                             <span class="flex items-center gap-1.5">
-                                <span class="icon-[mdi--cloud-off-outline] text-sm"></span>
-                                No upload required
+                                <span class="icon-[mdi--memory] text-sm"></span>
+                                Memory only
                             </span>
                         </div>
                     </div>
@@ -212,7 +215,7 @@
         <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
             <div class="grid grid-cols-2 gap-8 sm:grid-cols-4">
                 <div class="text-center">
-                    <p class="text-2xl font-bold text-slate-900 sm:text-3xl">200+</p>
+                    <p class="text-2xl font-bold text-slate-900 sm:text-3xl">4</p>
                     <p class="mt-1 text-xs font-medium text-slate-500">Formats Supported</p>
                 </div>
                 <div class="text-center">
@@ -224,8 +227,8 @@
                     <p class="mt-1 text-xs font-medium text-slate-500">No hidden costs</p>
                 </div>
                 <div class="text-center">
-                    <p class="text-2xl font-bold text-slate-900 sm:text-3xl">256-bit</p>
-                    <p class="mt-1 text-xs font-medium text-slate-500">Encryption</p>
+                    <p class="text-2xl font-bold text-slate-900 sm:text-3xl">100%</p>
+                    <p class="mt-1 text-xs font-medium text-slate-500">In-Memory</p>
                 </div>
             </div>
         </div>
@@ -265,7 +268,7 @@
                         Secure Processing
                     </h3>
                     <p class="mt-2 text-sm leading-relaxed text-slate-500">
-                        Files are processed temporarily and automatically cleaned up to help protect your privacy.
+                        Files are processed in-memory with no disk storage to help protect your privacy.
                     </p>
                 </div>
 
@@ -289,7 +292,7 @@
                         Popular Formats
                     </h3>
                     <p class="mt-2 text-sm leading-relaxed text-slate-500">
-                        Easily convert between JPG, PNG, and WebP image formats.
+                        Easily convert between JPG, JPEG, PNG, and WebP image formats.
                     </p>
                 </div>
 
@@ -327,7 +330,7 @@
             <div class="mx-auto max-w-2xl text-center">
                 <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Supported Formats</h2>
                 <p class="mt-3 text-base leading-relaxed text-slate-500">
-                    Every image format you'll ever need, all in one place.
+                    Convert between the most common web image formats.
                 </p>
             </div>
             <div class="mt-12">
@@ -353,7 +356,6 @@
     <script>
         Alpine.data('converterData', () => ({
             files: @entangle('imagesData'),
-            convertedImages: @entangle('convertedImages'),
             dragOver: false,
             converting: false,
             converted: false,
@@ -362,13 +364,14 @@
             formats: [
                 { value: 'png', label: 'PNG', desc: 'Lossless, transparency' },
                 { value: 'jpg', label: 'JPG', desc: 'Lossy, small files' },
+                { value: 'jpeg', label: 'JPEG', desc: 'Lossy, high quality' },
                 { value: 'webp', label: 'WebP', desc: 'Modern, efficient' }
             ],
 
             formatCategories: [
                 {
                     name: 'Raster Images',
-                    formats: ['PNG', 'JPG', 'WebP'],
+                    formats: ['PNG', 'JPG', 'JPEG', 'WebP'],
                 }
             ],
 
@@ -392,7 +395,6 @@
             addFiles(fileList) {
                 this.convertedImages = []
                 for (const file of fileList) {
-                    console.log(file)
                     if (!file.type.startsWith('image/')) continue
                     const ext = file.name.split('.').pop().toLowerCase()
                     const match = this.formats.find(f => f.value === ext)
@@ -414,6 +416,9 @@
                     )
                 }
                 this.converted = false
+
+                console.log(this.files);
+                return
             },
 
             removeFile(index) {
@@ -424,17 +429,6 @@
             selectToFormat(index, value) {
                 this.files[index].toFormat = value
                 this.converted = false
-            },
-
-            convert() {
-                // if (this.files.length === 0 || this.converting) return
-                // this.converting = true
-                // this.converted = false
-
-                // setTimeout(() => {
-                //     this.converting = false
-                //     this.converted = true
-                // }, 2000)
             },
         }))
     </script>
