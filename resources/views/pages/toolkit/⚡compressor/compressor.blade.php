@@ -1,6 +1,9 @@
 <div class="min-h-screen bg-slate-50 font-sans">
 
     @section('title', 'Image Forge | Compressor')
+    @section('description', 'Compress images online for free with Image Forge. Reduce file sizes while maintaining quality. Coming soon.')
+    @section('og:title', 'Image Forge | Free Online Image Compressor')
+    @section('og:description', 'Compress images online for free. Reduce file sizes while maintaining quality. Coming soon.')
 
     <section class="relative -mt-[73px] overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 pt-[73px]">
         <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA2MCAwIEwgMCAwIDAgNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-40"></div>
@@ -21,7 +24,7 @@
             <div class="mx-auto mt-12 max-w-lg">
                 <div class="overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5">
                     <div class="flex flex-col items-center gap-6 p-12 sm:p-16">
-                        <span class="flex h-20 w-20 items-center justify-center rounded-full bg-amber-100 text-amber-500">
+                        <span class="flex h-20 w-20 items-center justify-center rounded-full bg-amber-100 text-amber-500" aria-hidden="true">
                             <span class="icon-[mdi--tools] text-4xl"></span>
                         </span>
                         <div class="text-center">
@@ -36,8 +39,9 @@
                             <a
                                 href="/"
                                 class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                                aria-label="Go to image converter"
                             >
-                                <span class="icon-[mdi--arrow-left] text-lg"></span>
+                                <span class="icon-[mdi--arrow-left] text-lg" aria-hidden="true"></span>
                                 Try Converter
                             </a>
                         </div>
