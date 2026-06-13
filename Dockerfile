@@ -11,7 +11,7 @@ COPY . .
 RUN npm run build
 
 # ---------- Laravel App ----------
-FROM php:8.3-cli
+FROM php:8.5-cli
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -21,13 +21,19 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     zip \
     sqlite3 \
-    libsqlite3-dev
+    libsqlite3-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libwebp-dev \
+    libfreetype6-dev
 
 # PHP extensions
-RUN docker-php-ext-install \
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install -j$(nproc) \
     pdo \
     pdo_mysql \
-    zip
+    zip \
+    gd
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
