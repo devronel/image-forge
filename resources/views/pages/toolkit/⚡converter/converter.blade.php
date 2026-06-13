@@ -62,10 +62,7 @@
                         </div>
 
                         {{-- Conversion Status --}}
-                        <div aria-live="polite" aria-atomic="true" class="sr-only">
-                            <template x-if="converting">Conversion in progress.</template>
-                            <template x-if="converted && !converting">Conversion complete.</template>
-                        </div>
+                        <div aria-live="polite" aria-atomic="true" class="sr-only" x-text="converting ? 'Conversion in progress.' : converted ? 'Conversion complete.' : ''"></div>
 
                         {{-- File List --}}
                         @if (!empty($convertedImages))
@@ -194,24 +191,18 @@
                                 class="cursor-pointer flex w-full items-center justify-center gap-2.5 rounded-xl px-6 py-3.5 text-sm font-semibold text-white transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50"
                                 :class="converting ? 'bg-indigo-500' : files.length > 0 ? 'bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98]' : 'bg-slate-300'"
                             >
-                                <template x-if="!converting && !converted">
-                                    <>
-                                        <span class="icon-[mdi--upload-outline] text-lg" aria-hidden="true"></span>
-                                        Convert <span x-show="files.length > 0" x-text="'(' + files.length + ')'"></span>
-                                    </>
-                                </template>
-                                <template x-if="converting">
-                                    <>
-                                        <span class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-hidden="true"></span>
-                                        Converting...
-                                    </>
-                                </template>
-                                <template x-if="converted && !converting">
-                                    <>
-                                        <span class="icon-[mdi--check-circle] text-lg" aria-hidden="true"></span>
-                                        Conversion Complete
-                                    </>
-                                </template>
+                                <span x-show="!converting && !converted" class="inline-flex items-center gap-2.5">
+                                    <span class="icon-[mdi--upload-outline] text-lg" aria-hidden="true"></span>
+                                    Convert <span x-show="files.length > 0" x-text="'(' + files.length + ')'"></span>
+                                </span>
+                                <span x-show="converting" class="inline-flex items-center gap-2.5">
+                                    <span class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" aria-hidden="true"></span>
+                                    Converting...
+                                </span>
+                                <span x-show="converted && !converting" class="inline-flex items-center gap-2.5">
+                                    <span class="icon-[mdi--check-circle] text-lg" aria-hidden="true"></span>
+                                    Conversion Complete
+                                </span>
                             </button>
                         </div>
 
@@ -437,14 +428,11 @@
                         `images.${id}`,
                         file,
                         (uploadedFilename) => {
-                            console.log(uploadedFilename)
+                            
                         }
                     )
                 }
                 this.converted = false
-
-                console.log(this.files);
-                return
             },
 
             removeFile(index) {
