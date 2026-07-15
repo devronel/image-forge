@@ -30,36 +30,38 @@
                 <div class="overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5">
                     <div class="p-6 sm:p-8">
                         {{-- Drop Zone --}}
-                        <div
-                            @dragover.prevent="dragOver = true"
-                            @dragleave.prevent="dragOver = false"
-                            @drop.prevent="handleDrop($event)"
-                            @keydown.enter.prevent="document.getElementById('fileInput').click()"
-                            @keydown.space.prevent="document.getElementById('fileInput').click()"
-                            role="button"
-                            tabindex="0"
-                            aria-label="Upload images. Click or drag and drop files here."
-                            :class="{
-                                'relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition-all duration-200': true,
-                                'border-indigo-300 bg-indigo-50/50': files.length === 0 && !dragOver,
-                                'border-indigo-400 bg-indigo-100/70': dragOver,
-                                'border-emerald-300 bg-emerald-50/50': files.length > 0 && !dragOver,
-                            }"
-                        >
-                            <div @click="document.getElementById('fileInput').click()" class="flex flex-col items-center gap-3">
-                                <span class="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100 text-indigo-600" aria-hidden="true">
-                                    <span class="icon-[mdi--file-image-outline] text-2xl"></span>
-                                </span>
-                                <div class="text-center">
-                                    <p class="text-sm font-medium text-slate-700">
-                                        <span class="text-indigo-600 underline underline-offset-2">Click to upload</span>
-                                        <span class="text-slate-500"> or drag and drop</span>
-                                    </p>
-                                    <p class="mt-1 text-xs text-slate-400">PNG, JPEG, JPG, WebP — up to 16 MB each</p>
+                        @if (count($convertedImages) <= 0)
+                            <div
+                                @dragover.prevent="dragOver = true"
+                                @dragleave.prevent="dragOver = false"
+                                @drop.prevent="handleDrop($event)"
+                                @keydown.enter.prevent="document.getElementById('fileInput').click()"
+                                @keydown.space.prevent="document.getElementById('fileInput').click()"
+                                role="button"
+                                tabindex="0"
+                                aria-label="Upload images. Click or drag and drop files here."
+                                :class="{
+                                    'relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition-all duration-200': true,
+                                    'border-indigo-300 bg-indigo-50/50': files.length === 0 && !dragOver,
+                                    'border-indigo-400 bg-indigo-100/70': dragOver,
+                                    'border-emerald-300 bg-emerald-50/50': files.length > 0 && !dragOver,
+                                }"
+                            >
+                                <div @click="document.getElementById('fileInput').click()" class="flex flex-col items-center gap-3">
+                                    <span class="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100 text-indigo-600" aria-hidden="true">
+                                        <span class="icon-[mdi--file-image-outline] text-2xl"></span>
+                                    </span>
+                                    <div class="text-center">
+                                        <p class="text-sm font-medium text-slate-700">
+                                            <span class="text-indigo-600 underline underline-offset-2">Click to upload</span>
+                                            <span class="text-slate-500"> or drag and drop</span>
+                                        </p>
+                                        <p class="mt-1 text-xs text-slate-400">PNG, JPEG, JPG, WebP — up to 16 MB each</p>
+                                    </div>
                                 </div>
+                                <input id="fileInput" type="file" accept=".jpeg,.jpg,.png,.webp" multiple @change="handleFileSelect($event)" class="hidden" aria-hidden="true" tabindex="-1">
                             </div>
-                            <input id="fileInput" type="file" accept=".jpeg,.jpg,.png,.webp" multiple @change="handleFileSelect($event)" class="hidden" aria-hidden="true" tabindex="-1">
-                        </div>
+                        @endif
 
                         {{-- Conversion Status --}}
                         <div aria-live="polite" aria-atomic="true" class="sr-only" x-text="converting ? 'Conversion in progress.' : converted ? 'Conversion complete.' : ''"></div>
@@ -67,10 +69,13 @@
                         {{-- File List --}}
                         @if (!empty($convertedImages))
                             <div class="mt-6 space-y-3" aria-label="Converted files">
-                                <p class="text-xs font-medium text-emerald-600">
-                                    <span class="icon-[mdi--check-circle] mr-1 text-xs" aria-hidden="true"></span>
-                                    {{ count($convertedImages) }} converted file{{ count($convertedImages) !== 1 ? 's' : '' }}
-                                </p>
+                                <div class="flex items-center justify-between">
+                                    <p class="text-xs font-medium text-emerald-600">
+                                        <span class="icon-[mdi--check-circle] mr-1 text-xs" aria-hidden="true"></span>
+                                        {{ count($convertedImages) }} converted file{{ count($convertedImages) !== 1 ? 's' : '' }}
+                                    </p>
+                                    <button wire:click='resetProperties()' class="cursor-pointer text-xs font-medium text-red-500 transition hover:text-red-600" aria-label="Remove all selected files">Reset</button>
+                                </div>
                                 @foreach ($convertedImages as $index => $converted)
                                     <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                                         <div class="flex items-start gap-4 p-4">
@@ -82,7 +87,7 @@
                                                 <img src="data:image/{{ $mime }};base64,{{ $converted['data'] }}" alt="Preview of {{ $converted['name'] }}" class="h-full w-full object-cover">
                                             </div>
                                             <div class="min-w-0 flex-1">
-                                                <p class="truncate text-sm font-medium text-slate-900">{{ $converted['name'] }}</p>
+                                                <p title="{{ $converted['name'] }}" class="truncate text-sm font-medium text-slate-900">{{ $converted['name'] }}</p>
                                                 <p class="mt-0.5 text-xs text-slate-500">{{ round(strlen(base64_decode($converted['data'])) / 1024, 1) . ' KB' }}</p>
                                                 <div class="mt-2">
                                                     <button
@@ -402,6 +407,7 @@
             handleFileSelect(event) {
                 this.addFiles(event.target.files)
                 event.target.value = ''
+                // this.$wire.resetProperties()
             },
 
             handleDrop(event) {

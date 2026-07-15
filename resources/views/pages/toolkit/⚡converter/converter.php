@@ -48,7 +48,8 @@ new class extends Component
         try {
             foreach ($validated['imagesData'] as $image) {
                 $data = app(ImageProcessingService::class)->convert($validated['images'][$image['id']], $image['toFormat']);
-                $name = now()->format('Ymd_His') . '_' . Str::ulid() . '.' . $image['toFormat'];
+                $filename = $validated['images'][$image['id']]->getClientOriginalName();
+                $name = pathinfo($filename, PATHINFO_FILENAME) . '-converted-' . now()->format('Ymd_His') . '.' . $image['toFormat'];
                 $this->convertedImages[] = ['name' => $name, 'data' => base64_encode($data)];
             }
     
@@ -73,5 +74,10 @@ new class extends Component
         return response()->streamDownload(function () use ($item) {
             echo base64_decode($item['data']);
         }, $item['name']);
+    }
+
+    public function resetProperties()
+    {
+        $this->reset('convertedImages');
     }
 };
